@@ -1,5 +1,7 @@
 const feathers = require('feathers');
 const socketio = require('feathers-socketio');
+const MongoClient = require('mongodb').MongoClient;
+const service = require('feathers-mongodb');
 
 const app = feathers();
 
@@ -16,8 +18,14 @@ app.configure(socketio(function(io) {
     //   console.log(data);
     // });
 
+    // GET DATA FROM CLIENT AND PASS IT BACK TO THE CLIENT
     socket.on('test2', function (data) {
       socket.emit('test', data);
+    });
+
+    // SAVING DATA TO THE DATABASE
+    MongoClient.connect('mongodb://localhost:27017/feathers').then(db => {
+      db.collection('messages').insert({name: 'test'})
     });
   });
 

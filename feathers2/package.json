@@ -15,7 +15,9 @@
     "babel-preset-stage-3": "^6.24.1",
     "babel-register": "^6.24.1",
     "feathers": "^2.1.1",
-    "feathers-socketio": "^1.6.0"
+    "feathers-mongodb": "^2.8.0",
+    "feathers-socketio": "^1.6.0",
+    "mongodb": "^2.2.26"
   },
   "devDependencies": {
     "babel-cli": "^6.24.1",
