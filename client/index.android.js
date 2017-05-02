@@ -10,7 +10,8 @@ import {
   StyleSheet,
   Text,
   View,
-  AsyncStorage
+  AsyncStorage,
+  Button,
 } from 'react-native';
 import feathers from 'feathers/client'
 import hooks from 'feathers-hooks';
@@ -25,6 +26,15 @@ app.configure(socketio(socket, {timeout: 10000}));
 app.configure(authentication({ storage: AsyncStorage }));
 
 export default class client extends Component {
+  constructor(props) {
+    super(props);
+    this.test = this.test.bind(this);
+  }
+
+  test() {
+    app.io.emit('test', { hello: 'world' });
+  }
+
   componentDidMount() {
     app.io.on('connect', () => {
       console.log('connected');
@@ -34,7 +44,7 @@ export default class client extends Component {
     })
 
     // SEND DATA TO THE SERVER
-    app.io.emit('test2', { hello: 'world' });
+    // app.io.emit('test2', { hello: 'world' });
 
     // RECEIVER DATA FROM SERVER
     app.io.on('test', (res)=>{
@@ -45,16 +55,7 @@ export default class client extends Component {
   render() {
     return (
       <View style={styles.container}>
-        <Text style={styles.welcome}>
-          Welcome to React Native!
-        </Text>
-        <Text style={styles.instructions}>
-          To get started, edit index.android.js
-        </Text>
-        <Text style={styles.instructions}>
-          Double tap R on your keyboard to reload,{'\n'}
-          Shake or press menu button for dev menu
-        </Text>
+        <Button onPress={this.test} title='Pass'></Button>
       </View>
     );
   }

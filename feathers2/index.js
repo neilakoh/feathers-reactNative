@@ -19,14 +19,14 @@ app.configure(socketio(function(io) {
     // });
 
     // GET DATA FROM CLIENT AND PASS IT BACK TO THE CLIENT
-    socket.on('test2', function (data) {
+    socket.on('test', function (data) {
       socket.emit('test', data);
     });
 
     // SAVING DATA TO THE DATABASE
-    MongoClient.connect('mongodb://localhost:27017/feathers').then(db => {
-      db.collection('messages').insert({name: 'test'})
-    });
+    // MongoClient.connect('mongodb://localhost:27017/feathers').then(db => {
+    //   db.collection('messages').insert({name: 'test'})
+    // });
   });
 
   // io.on('disconnected', function(socket) {
