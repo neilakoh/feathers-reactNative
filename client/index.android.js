@@ -48,7 +48,7 @@ export default class client extends Component {
 
     // RECEIVER DATA FROM SERVER
     app.io.on('test', (res)=>{
-      console.log(res);
+      console.log(res.ops);
     })
   }
 
