@@ -28,14 +28,34 @@ app.configure(authentication({ storage: AsyncStorage }));
 export default class client extends Component {
   constructor(props) {
     super(props);
-    this.test = this.test.bind(this);
+    this.state = {
+      docId: '',
+      data: [],
+    }
+    this.insert = this.insert.bind(this);
+    this.remove = this.remove.bind(this);
+    this.update = this.update.bind(this);
   }
 
-  test() {
-    app.io.emit('test', { hello: 'world' });
+  insert() {
+    app.io.emit('insert', { name: 'jun' });
+    app.io.emit('subscribe', { collection: 'messages' });
+  }
+
+  remove(docId) {
+    app.io.emit('remove', { _id:  docId});
+    app.io.emit('subscribe', { collection: 'messages' });
+  }
+
+  update() {
+    const {docId} = this.state;
+    const newName = 'neil';
+    app.io.emit('update', { _id:  docId, newVal: newName});
+    app.io.emit('subscribe', { collection: 'messages' });
   }
 
   componentDidMount() {
+    const {docId} = this.state;
     app.io.on('connect', () => {
       console.log('connected');
     })
@@ -43,19 +63,55 @@ export default class client extends Component {
       console.log('disconnected');
     })
 
-    // SEND DATA TO THE SERVER
-    // app.io.emit('test2', { hello: 'world' });
-
-    // RECEIVER DATA FROM SERVER
-    app.io.on('test', (res)=>{
-      console.log(res.ops);
+    // SUBSCRIBING TO DATA
+    app.io.emit('subscribe', { collection: 'messages' });
+    app.io.on('subscribe', (res)=>{
+      this.setState({data: res})
     })
+
+    // CRUD
+    app.io.on('insert', (res)=>{
+      this.setState({docId: res.ops[0]._id})
+    })
+
+    app.io.on('remove', (res)=>{
+      if(res.n === 1 && res.ok === 1) {
+        alert('Record successfully deleted.')
+      } else {
+        alert('Failed to remove record')
+      }
+    })
+
+    app.io.on('update', (res)=>{
+      if(res.n === 1 && res.ok === 1 && res.nModified === 1) {
+        alert('Record successfully updated.')
+      } else {
+        alert('Failed to update record')
+      }
+    })
+
   }
 
   render() {
+    const {data} = this.state;
+    console.log(data);
     return (
       <View style={styles.container}>
-        <Button onPress={this.test} title='Pass'></Button>
+        {
+          data.length > 0 ? data.map((d, i) => (
+            <View key={i}>
+              <Text>{d.name}</Text>
+              <Button title='Remove' onPress={()=>{this.remove(d._id)}}></Button>
+            </View>
+          )) : null
+        }
+        <View style={{height: 5}} />
+        <View style={{height: 5}} />
+        <View style={{height: 5}} />
+        <View style={{height: 5}} />
+        <Button onPress={this.insert} title='Insert'></Button>
+        <View style={{height: 5}} />
+        {/* <Button onPress={this.update} title='Update'></Button> */}
       </View>
     );
   }

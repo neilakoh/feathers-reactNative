@@ -1,6 +1,7 @@
 const feathers = require('feathers');
 const socketio = require('feathers-socketio');
 const MongoClient = require('mongodb').MongoClient;
+const ObjectId = require('mongodb').ObjectID;
 const service = require('feathers-mongodb');
 
 const methods = require('./methods/app.js');
@@ -11,36 +12,38 @@ app.configure(socketio(function(io) {
   io.on('connection', function(socket) {
     console.log('connected');
 
-    socket.on('test', function (data) {
-      methods.mongoInsert(MongoClient, mongoUrl, data).then((res)=>{
-        socket.emit('test', res);
-      })
+    socket.on('insert', function (query) {
+      methods.mongoInsert(MongoClient, mongoUrl, query).then((res)=>{
+        socket.emit('insert', res);
+      });
     });
 
-    // THIS IS TO PASS DATA FROM SERVER TO CLIENT BY CALLING THE EMIT 'test' IN THE CLIENT
-    // DATA SENDER
-    // socket.emit('test', { hello: 'world' });
+    socket.on('remove', function (query) {
+      let query2 = {_id: ObjectId(query._id)};
+      methods.mongoRemove(MongoClient, mongoUrl, query2).then((res)=>{
+        socket.emit('remove', res);
+      });
+    });
 
-    // RECEIVE DATA FROM CLIENT BY CALLING 'test2' IN THE SERVER
-    // DATA RECEIVER
-    // socket.on('test2', function (data) {
-    //   console.log(data);
-    // });
+    socket.on('update', function (query) {
+      let id = ObjectId(query._id);
+      let newValue = query.newVal;
+      methods.mongoUpdate(MongoClient, mongoUrl, id, newValue).then((res)=>{
+        socket.emit('update', res);
+      });
+    });
 
-    // GET DATA FROM CLIENT AND PASS IT BACK TO THE CLIENT
-    // socket.on('test', function (data) {
-    //   socket.emit('test', data);
-    // });
+    socket.on('subscribe', function (query) {
+      const collection = query.collection;
+      methods.mongoSubscribe(MongoClient, mongoUrl, collection).then((res)=>{
+        socket.emit('subscribe', res);
+      });
+    });
 
-    // SAVING DATA TO THE DATABASE
-    // MongoClient.connect('mongodb://localhost:27017/feathers').then(db => {
-    //   db.collection('messages').insert({name: 'test'})
-    // });
+    socket.on('disconnect', function(socket) {
+      console.log('disconnected');
+    });
   });
-
-  // io.on('disconnected', function(socket) {
-  //   console.log('disconnected');
-  // });
 
   // Registering Socket.io middleware
   io.use(function (socket, next) {
